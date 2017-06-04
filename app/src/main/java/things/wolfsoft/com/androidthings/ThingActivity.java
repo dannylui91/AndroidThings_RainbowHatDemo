@@ -35,13 +35,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import static things.wolfsoft.com.androidthings.melody.Tunes.*;
 
 public class ThingActivity extends AppCompatActivity {
     private static final String TAG = "ThingActivity";
@@ -227,6 +225,49 @@ public class ThingActivity extends AppCompatActivity {
         } catch (IOException e) {
             throw new RuntimeException("Error initializing BMP280", e);
         }
+
+        listenForMelody();
+    }
+
+    private void listenForMelody() {
+        ref.child("melody").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String melody = (String) dataSnapshot.getValue();
+                switch (melody) {
+                    case "Mary Had A Little Lamb":
+                        playTune();
+                        break;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void playTune() {
+        handler = new Handler();
+
+        for (int i = 0; i < MARY.length; i++) {
+
+            final int finalI = i;
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        speaker.play(MARY[finalI]);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 1000);
+        }
+
+
     }
 
     private void listenForColor() {
